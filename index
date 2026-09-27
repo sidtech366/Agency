@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Default Mobile Viewport -->
+  <meta id="viewport-meta" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BMCP School</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #f4f4f4;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    /* Bottom Floating Button Design */
+    #toggle-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px; /* Ya left: 20px kar sakte hain left me rakhne ke liye */
+      padding: 7px 10px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 6px;
+      font-weight: bold;
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+      z-index: 9999;
+      cursor: pointer;
+    }
+    #toggle-btn:active {
+      background-color: #1976D2;
+    }
+  </style>
+</head>
+<body>
+
+  <iframe 
+    id="school-frame"
+    src="https://sidtech366.ai.studio/"
+    allowfullscreen="true">
+  </iframe>
+
+  <!-- Toggle Button -->
+  <button id="toggle-btn" onclick="toggleView()">💻PC</button>
+
+  <script>
+    let isDesktop = false;
+
+    function toggleView() {
+      const meta = document.getElementById('viewport-meta');
+      const btn = document.getElementById('toggle-btn');
+      const iframe = document.getElementById('school-frame');
+
+      if (!isDesktop) {
+        // Desktop View Enable (Screen width ko force 1024px par set karna)
+        meta.setAttribute('content', 'width=1024');
+        btn.innerHTML = '📱 Mobile View';
+        isDesktop = true;
+      } else {
+        // Mobile View Enable (Default device width)
+        meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        btn.innerHTML = '💻 Desktop View';
+        isDesktop = false;
+      }
+      
+      // Iframe ko reload karein taaki Google Script naye resolution ke hisaab se adjust ho jaye
+      // Agar bina reload ke theek se scale ho raha hai to is line ko hata sakte hain
+      iframe.src = iframe.src; 
+    }
+
+    // Note: Auto-fullscreen bina user click ke mobile browsers/APK me block ho jata hai.
+    // Agar aap Android Studio use kar rahe hain, to WebView ko match_parent karke full screen achieve karein.
+    window.onload = function() {
+      document.querySelector('iframe').requestFullscreen().catch((err) => {
+        console.log('Auto fullscreen blocked by device policy. User needs to tap first.');
+      });
+    };
+  </script>
+
+</body>
+</html>
