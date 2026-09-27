@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Default Mobile Viewport -->
   <meta id="viewport-meta" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- PWA ke liye manifest zaroori hai (Neeche steps me bataya hai) -->
-  <link rel="manifest" href="manifest.json">
   <title>SidTech 366</title>
   <style>
     body, html {
@@ -14,7 +13,6 @@
       height: 100%;
       overflow: hidden;
       background-color: #f4f4f4;
-      font-family: Arial, sans-serif;
     }
     iframe {
       width: 100%;
@@ -22,71 +20,24 @@
       border: none;
       display: block;
     }
-    
-    /* Bottom Floating PC/Mobile Toggle Button */
+    /* Bottom Floating Button Design */
     #toggle-btn {
       position: fixed;
       bottom: 20px;
-      right: 20px; 
+      right: 20px; /* Ya left: 20px kar sakte hain left me rakhne ke liye */
       padding: 7px 10px;
       background-color: #2196F3;
       color: white;
       border: none;
       border-radius: 5px;
-      font-size: 14px; /* Thoda bada kiya taaki padhne me aaye */
+      font-size: 6px;
       font-weight: bold;
       box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
-      z-index: 9998;
+      z-index: 9999;
       cursor: pointer;
     }
     #toggle-btn:active {
       background-color: #1976D2;
-    }
-
-    /* Install App Pop-up Design */
-    #install-popup {
-      position: fixed;
-      bottom: 80px; /* Toggle button ke thoda upar */
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #ffffff;
-      padding: 15px 20px;
-      border-radius: 10px;
-      box-shadow: 0px 5px 15px rgba(0,0,0,0.3);
-      z-index: 9999;
-      display: none; /* Default hidden */
-      text-align: center;
-      width: 85%;
-      max-width: 320px;
-    }
-    #install-popup p {
-      margin: 0 0 12px 0;
-      color: #333;
-      font-size: 15px;
-      font-weight: bold;
-    }
-    .popup-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-    .install-btn {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .close-btn {
-      background-color: #f44336;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
     }
   </style>
 </head>
@@ -99,19 +50,9 @@
   </iframe>
 
   <!-- Toggle Button -->
-  <button id="toggle-btn" onclick="toggleView()">💻 PC View</button>
-
-  <!-- Install App Pop-up -->
-  <div id="install-popup">
-    <p>Install SidTech 366 App for a better experience!</p>
-    <div class="popup-buttons">
-      <button class="install-btn" id="install-btn-action">Install</button>
-      <button class="close-btn" onclick="closeInstallPopup()">Close</button>
-    </div>
-  </div>
+  <button id="toggle-btn" onclick="toggleView()">💻PC</button>
 
   <script>
-    // --- 1. PC / Mobile Toggle Logic ---
     let isDesktop = false;
 
     function toggleView() {
@@ -120,54 +61,29 @@
       const iframe = document.getElementById('school-frame');
 
       if (!isDesktop) {
+        // Desktop View Enable (Screen width ko force 1024px par set karna)
         meta.setAttribute('content', 'width=1024');
         btn.innerHTML = '📱 Mobile View';
         isDesktop = true;
       } else {
+        // Mobile View Enable (Default device width)
         meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-        btn.innerHTML = '💻 PC View';
+        btn.innerHTML = '💻 Desktop View';
         isDesktop = false;
       }
-    }
-
-    // --- 2. Install App Pop-up Logic ---
-    let deferredPrompt;
-    const installPopup = document.getElementById('install-popup');
-    const installBtn = document.getElementById('install-btn-action');
-
-    // Check if user previously closed the popup
-    const isPopupClosed = localStorage.getItem('installPopupClosed');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // Browser ka default prompt rokein
-      e.preventDefault();
-      // Event ko save karein taaki button click par use kar sakein
-      deferredPrompt = e;
       
-      // Agar user ne pehle close nahi kiya hai, tabhi dikhayein
-      if (!isPopupClosed) {
-        installPopup.style.display = 'block';
-      }
-    });
-
-    installBtn.addEventListener('click', async () => {
-      // Custom popup hide karein
-      installPopup.style.display = 'none';
-      if (deferredPrompt) {
-        // Asli browser installation prompt dikhayein
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response: ${outcome}`);
-        // Prompt ek hi baar use ho sakta hai
-        deferredPrompt = null;
-      }
-    });
-
-    function closeInstallPopup() {
-      installPopup.style.display = 'none';
-      // LocalStorage me save karein taaki next time website kholne par tang na kare
-      localStorage.setItem('installPopupClosed', 'true');
+      // Iframe ko reload karein taaki Google Script naye resolution ke hisaab se adjust ho jaye
+      // Agar bina reload ke theek se scale ho raha hai to is line ko hata sakte hain
+      iframe.src = iframe.src; 
     }
+
+    // Note: Auto-fullscreen bina user click ke mobile browsers/APK me block ho jata hai.
+    // Agar aap Android Studio use kar rahe hain, to WebView ko match_parent karke full screen achieve karein.
+    window.onload = function() {
+      document.querySelector('iframe').requestFullscreen().catch((err) => {
+        console.log('Auto fullscreen blocked by device policy. User needs to tap first.');
+      });
+    };
   </script>
 
 </body>
