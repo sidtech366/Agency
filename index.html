@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Default Mobile Viewport -->
-  <meta id="viewport-meta" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SidTech 366</title>
+  <!-- Default Desktop View -->
+  <meta id="viewport-meta" name="viewport" content="width=1024">
+  <title>SidTech App</title>
   <style>
     body, html {
       margin: 0;
@@ -13,77 +13,162 @@
       height: 100%;
       overflow: hidden;
       background-color: #f4f4f4;
+      font-family: Arial, sans-serif;
     }
+    
     iframe {
       width: 100%;
       height: 100%;
       border: none;
       display: block;
     }
-    /* Bottom Floating Button Design */
-    #toggle-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px; /* Ya left: 20px kar sakte hain left me rakhne ke liye */
-      padding: 7px 10px;
-      background-color: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 6px;
-      font-weight: bold;
-      box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
-      z-index: 9999;
-      cursor: pointer;
+
+    /* Jab hum drag karte hain, to iframe ke andar mouse na chala jaye isliye pointer-events disable karenge */
+    body.is-dragging iframe {
+      pointer-events: none;
     }
-    #toggle-btn:active {
-      background-color: #1976D2;
+
+    /* Floating Draggable Icon (Glassmorphic) */
+    #draggable-btn {
+      position: absolute; /* Fixed ke bajaye absolute for coordinate dragging */
+      width: 45px;
+      height: 45px;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      cursor: grab;
+      z-index: 10000;
+      user-select: none;
+      touch-action: none; /* Touch screen par scroll ko rokne ke liye */
+    }
+    
+    #draggable-btn:active {
+      cursor: grabbing;
+      background: rgba(255, 255, 255, 0.6);
     }
   </style>
 </head>
 <body>
 
   <iframe 
-    id="school-frame"
-    src="https://sidtech366.ai.studio/"
+    id="main-frame"
+    src="https://sidtech1.ai.studio"
     allowfullscreen="true">
   </iframe>
 
-  <!-- Toggle Button -->
-  <button id="toggle-btn" onclick="toggleView()">💻PC</button>
+  <!-- Floating Draggable Icon (Default Desktop set hai to Mobile Icon dikhayega switch karne ke liye) -->
+  <div id="draggable-btn">📱</div>
 
   <script>
-    let isDesktop = false;
+    // --- View Toggle Logic ---
+    let isDesktop = true; // By default desktop
+    const meta = document.getElementById('viewport-meta');
+    const btn = document.getElementById('draggable-btn');
 
     function toggleView() {
-      const meta = document.getElementById('viewport-meta');
-      const btn = document.getElementById('toggle-btn');
-      const iframe = document.getElementById('school-frame');
-
-      if (!isDesktop) {
-        // Desktop View Enable (Screen width ko force 1024px par set karna)
-        meta.setAttribute('content', 'width=1024');
-        btn.innerHTML = '📱 Mobile View';
-        isDesktop = true;
-      } else {
-        // Mobile View Enable (Default device width)
+      if (isDesktop) {
+        // Switch to Mobile View
         meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-        btn.innerHTML = '💻 Desktop View';
+        btn.innerHTML = '💻'; // Ab desktop switch karne ka icon dikhao
         isDesktop = false;
+      } else {
+        // Switch to Desktop View
+        meta.setAttribute('content', 'width=1024');
+        btn.innerHTML = '📱'; // Ab mobile switch karne ka icon dikhao
+        isDesktop = true;
       }
-      
-      // Iframe ko reload karein taaki Google Script naye resolution ke hisaab se adjust ho jaye
-      // Agar bina reload ke theek se scale ho raha hai to is line ko hata sakte hain
-      iframe.src = iframe.src; 
     }
 
-    // Note: Auto-fullscreen bina user click ke mobile browsers/APK me block ho jata hai.
-    // Agar aap Android Studio use kar rahe hain, to WebView ko match_parent karke full screen achieve karein.
-    window.onload = function() {
-      document.querySelector('iframe').requestFullscreen().catch((err) => {
-        console.log('Auto fullscreen blocked by device policy. User needs to tap first.');
-      });
-    };
+    // --- Drag and Drop Logic ---
+    let isDragging = false;
+    let hasMoved = false; // Check karne ke liye ki click tha ya drag
+    let startX, startY, initialLeft, initialTop;
+
+    // Initial position (Bottom Right corner)
+    btn.style.left = (window.innerWidth - 65) + 'px';
+    btn.style.top = (window.innerHeight - 65) + 'px';
+
+    function onDragStart(e) {
+      isDragging = true;
+      hasMoved = false;
+      
+      // Get touch or mouse coordinates
+      startX = e.clientX || (e.touches && e.touches[0].clientX);
+      startY = e.clientY || (e.touches && e.touches[0].clientY);
+      
+      initialLeft = btn.offsetLeft;
+      initialTop = btn.offsetTop;
+      
+      document.body.classList.add('is-dragging'); // iframe interaction roko
+    }
+
+    function onDragMove(e) {
+      if (!isDragging) return;
+      e.preventDefault(); // Screen scroll na ho
+
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+      
+      const dx = clientX - startX;
+      const dy = clientY - startY;
+
+      // Agar 3 pixel se zyada move hua hai, to ise 'Drag' manenge, 'Click' nahi
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        hasMoved = true;
+      }
+
+      // New coordinates calculate karna
+      let newLeft = initialLeft + dx;
+      let newTop = initialTop + dy;
+
+      // Screen ke bahar na jaye uski boundary set karna
+      newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - btn.offsetWidth));
+      newTop = Math.max(0, Math.min(newTop, window.innerHeight - btn.offsetHeight));
+
+      btn.style.left = newLeft + 'px';
+      btn.style.top = newTop + 'px';
+    }
+
+    function onDragEnd(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      document.body.classList.remove('is-dragging');
+
+      // Agar icon bas touch/click hua tha (move nahi hua), to toggleView call karo
+      if (!hasMoved) {
+        toggleView();
+      }
+    }
+
+    // Mouse Events for PC
+    btn.addEventListener('mousedown', onDragStart);
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragEnd);
+
+    // Touch Events for Mobile
+    btn.addEventListener('touchstart', onDragStart, { passive: false });
+    document.addEventListener('touchmove', onDragMove, { passive: false });
+    document.addEventListener('touchend', onDragEnd);
+
+    // Jab window resize ho to icon screen ke bahar na chala jaye
+    window.addEventListener('resize', () => {
+      let currentLeft = parseInt(btn.style.left || 0);
+      let currentTop = parseInt(btn.style.top || 0);
+      
+      if (currentLeft > window.innerWidth - btn.offsetWidth) {
+        btn.style.left = (window.innerWidth - btn.offsetWidth - 10) + 'px';
+      }
+      if (currentTop > window.innerHeight - btn.offsetHeight) {
+        btn.style.top = (window.innerHeight - btn.offsetHeight - 10) + 'px';
+      }
+    });
   </script>
 
 </body>
