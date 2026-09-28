@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Default Desktop View -->
-  <meta id="viewport-meta" name="viewport" content="width=1024">
+  <!-- Default Mobile View -->
+  <meta id="viewport-meta" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SidTech App</title>
   <style>
     body, html {
@@ -23,16 +23,16 @@
       display: block;
     }
 
-    /* Jab hum drag karte hain, to iframe ke andar mouse na chala jaye isliye pointer-events disable karenge */
+    /* Jab hum drag karte hain, to iframe ke andar mouse/touch interfere na kare */
     body.is-dragging iframe {
       pointer-events: none;
     }
 
-    /* Floating Draggable Icon (Glassmorphic) */
+    /* Floating Draggable Icon (Size Increased by ~30%) */
     #draggable-btn {
-      position: absolute; /* Fixed ke bajaye absolute for coordinate dragging */
-      width: 45px;
-      height: 45px;
+      position: absolute;
+      width: 60px;  /* Pehle 45px tha */
+      height: 60px; /* Pehle 45px tha */
       background: rgba(255, 255, 255, 0.4);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
@@ -41,7 +41,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 22px;
+      font-size: 30px; /* Pehle 22px tha */
       box-shadow: 0 8px 16px rgba(0,0,0,0.2);
       cursor: grab;
       z-index: 10000;
@@ -63,55 +63,54 @@
     allowfullscreen="true">
   </iframe>
 
-  <!-- Floating Draggable Icon (Default Desktop set hai to Mobile Icon dikhayega switch karne ke liye) -->
-  <div id="draggable-btn">📱</div>
+  <!-- Default Mobile View hai, isliye icon PC ka dikhega switch karne ke liye -->
+  <div id="draggable-btn">💻</div>
 
   <script>
     // --- View Toggle Logic ---
-    let isDesktop = true; // By default desktop
+    let isDesktop = false; // By default Mobile
     const meta = document.getElementById('viewport-meta');
     const btn = document.getElementById('draggable-btn');
 
     function toggleView() {
-      if (isDesktop) {
-        // Switch to Mobile View
-        meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-        btn.innerHTML = '💻'; // Ab desktop switch karne ka icon dikhao
-        isDesktop = false;
-      } else {
+      if (!isDesktop) {
         // Switch to Desktop View
         meta.setAttribute('content', 'width=1024');
         btn.innerHTML = '📱'; // Ab mobile switch karne ka icon dikhao
         isDesktop = true;
+      } else {
+        // Switch to Mobile View
+        meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        btn.innerHTML = '💻'; // Ab desktop switch karne ka icon dikhao
+        isDesktop = false;
       }
     }
 
     // --- Drag and Drop Logic ---
     let isDragging = false;
-    let hasMoved = false; // Check karne ke liye ki click tha ya drag
+    let hasMoved = false; 
     let startX, startY, initialLeft, initialTop;
 
     // Initial position (Bottom Right corner)
-    btn.style.left = (window.innerWidth - 65) + 'px';
-    btn.style.top = (window.innerHeight - 65) + 'px';
+    btn.style.left = (window.innerWidth - 80) + 'px';
+    btn.style.top = (window.innerHeight - 80) + 'px';
 
     function onDragStart(e) {
       isDragging = true;
       hasMoved = false;
       
-      // Get touch or mouse coordinates
       startX = e.clientX || (e.touches && e.touches[0].clientX);
       startY = e.clientY || (e.touches && e.touches[0].clientY);
       
       initialLeft = btn.offsetLeft;
       initialTop = btn.offsetTop;
       
-      document.body.classList.add('is-dragging'); // iframe interaction roko
+      document.body.classList.add('is-dragging'); 
     }
 
     function onDragMove(e) {
       if (!isDragging) return;
-      e.preventDefault(); // Screen scroll na ho
+      e.preventDefault(); 
 
       const clientX = e.clientX || (e.touches && e.touches[0].clientX);
       const clientY = e.clientY || (e.touches && e.touches[0].clientY);
@@ -119,16 +118,14 @@
       const dx = clientX - startX;
       const dy = clientY - startY;
 
-      // Agar 3 pixel se zyada move hua hai, to ise 'Drag' manenge, 'Click' nahi
+      // Agar 3 pixel se zyada move hua hai, to drag manenge
       if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
         hasMoved = true;
       }
 
-      // New coordinates calculate karna
       let newLeft = initialLeft + dx;
       let newTop = initialTop + dy;
 
-      // Screen ke bahar na jaye uski boundary set karna
       newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - btn.offsetWidth));
       newTop = Math.max(0, Math.min(newTop, window.innerHeight - btn.offsetHeight));
 
@@ -141,7 +138,7 @@
       isDragging = false;
       document.body.classList.remove('is-dragging');
 
-      // Agar icon bas touch/click hua tha (move nahi hua), to toggleView call karo
+      // Agar icon sirf touch hua tha, to toggleView chalao
       if (!hasMoved) {
         toggleView();
       }
@@ -157,7 +154,7 @@
     document.addEventListener('touchmove', onDragMove, { passive: false });
     document.addEventListener('touchend', onDragEnd);
 
-    // Jab window resize ho to icon screen ke bahar na chala jaye
+    // Window resize hone par icon bahar na jaye
     window.addEventListener('resize', () => {
       let currentLeft = parseInt(btn.style.left || 0);
       let currentTop = parseInt(btn.style.top || 0);
