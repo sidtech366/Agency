@@ -10,9 +10,21 @@
       padding: 0;
       width: 100%;
       height: 100%;
-      overflow: hidden; /* Body me scrollbar na aaye */
+      /* Yahan se overflow: hidden hata diya hai taaki conflict na ho */
       background-color: #f4f4f4;
     }
+    
+    /* Scroll ko smooth banane ke liye naya container */
+    .scroll-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto; /* Scrolling ON */
+      -webkit-overflow-scrolling: touch; /* Mobile me smooth scroll ke liye zaroori */
+    }
+
     iframe {
       width: 100%;
       height: 100%;
@@ -23,11 +35,14 @@
 </head>
 <body>
 
-  <!-- Sirf Iframe -->
-  <iframe 
-    src="https://sidtech1.ai.studio" 
-    allowfullscreen="true">
-  </iframe>
+  <!-- Wrapper ke andar iframe dala hai -->
+  <div class="scroll-wrapper">
+    <iframe 
+      src="https://sidtech1.ai.studio" 
+      allowfullscreen="true"
+      scrolling="yes">
+    </iframe>
+  </div>
 
 </body>
 </html>
