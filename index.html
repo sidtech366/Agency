@@ -23,16 +23,16 @@
       display: block;
     }
 
-    /* Jab hum drag karte hain, to iframe ke andar mouse/touch interfere na kare */
+    /* Jab drag chal raha ho tabhi iframe click hona band ho, baaki time normal rahe */
     body.is-dragging iframe {
       pointer-events: none;
     }
 
-    /* Floating Draggable Icon (Size Increased by ~30%) */
+    /* Floating Draggable Icon */
     #draggable-btn {
       position: absolute;
-      width: 60px;  /* Pehle 45px tha */
-      height: 60px; /* Pehle 45px tha */
+      width: 60px;  
+      height: 60px; 
       background: rgba(255, 255, 255, 0.4);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
@@ -41,12 +41,12 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 30px; /* Pehle 22px tha */
+      font-size: 30px; 
       box-shadow: 0 8px 16px rgba(0,0,0,0.2);
       cursor: grab;
       z-index: 10000;
       user-select: none;
-      touch-action: none; /* Touch screen par scroll ko rokne ke liye */
+      touch-action: none; 
     }
     
     #draggable-btn:active {
@@ -63,25 +63,23 @@
     allowfullscreen="true">
   </iframe>
 
-  <!-- Default Mobile View hai, isliye icon PC ka dikhega switch karne ke liye -->
+  <!-- Button for switching views -->
   <div id="draggable-btn">💻</div>
 
   <script>
     // --- View Toggle Logic ---
-    let isDesktop = false; // By default Mobile
+    let isDesktop = false; 
     const meta = document.getElementById('viewport-meta');
     const btn = document.getElementById('draggable-btn');
 
     function toggleView() {
       if (!isDesktop) {
-        // Switch to Desktop View
         meta.setAttribute('content', 'width=1024');
-        btn.innerHTML = '📱'; // Ab mobile switch karne ka icon dikhao
+        btn.innerHTML = '📱'; 
         isDesktop = true;
       } else {
-        // Switch to Mobile View
         meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-        btn.innerHTML = '💻'; // Ab desktop switch karne ka icon dikhao
+        btn.innerHTML = '💻'; 
         isDesktop = false;
       }
     }
@@ -91,7 +89,7 @@
     let hasMoved = false; 
     let startX, startY, initialLeft, initialTop;
 
-    // Initial position (Bottom Right corner)
+    // Default Starting Position
     btn.style.left = (window.innerWidth - 80) + 'px';
     btn.style.top = (window.innerHeight - 80) + 'px';
 
@@ -118,7 +116,6 @@
       const dx = clientX - startX;
       const dy = clientY - startY;
 
-      // Agar 3 pixel se zyada move hua hai, to drag manenge
       if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
         hasMoved = true;
       }
@@ -138,23 +135,28 @@
       isDragging = false;
       document.body.classList.remove('is-dragging');
 
-      // Agar icon sirf touch hua tha, to toggleView chalao
-      if (!hasMoved) {
+      // Sirf tap karne par change ho, touch cancel ya window blur hone par nahi
+      if (!hasMoved && (e.type === 'mouseup' || e.type === 'touchend')) {
         toggleView();
       }
     }
 
-    // Mouse Events for PC
+    // PC Mouse Events
     btn.addEventListener('mousedown', onDragStart);
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
+    document.addEventListener('mouseleave', onDragEnd); // Galti se bahar jane par freeze roko
 
-    // Touch Events for Mobile
+    // Mobile Touch Events
     btn.addEventListener('touchstart', onDragStart, { passive: false });
     document.addEventListener('touchmove', onDragMove, { passive: false });
     document.addEventListener('touchend', onDragEnd);
+    document.addEventListener('touchcancel', onDragEnd); // FREEZE FIX: Mobile notification ya call aane par
 
-    // Window resize hone par icon bahar na jaye
+    // Extra Security: Browser app change hone par reset karo
+    window.addEventListener('blur', onDragEnd); 
+
+    // Window resize par bahar jaane se roko
     window.addEventListener('resize', () => {
       let currentLeft = parseInt(btn.style.left || 0);
       let currentTop = parseInt(btn.style.top || 0);
