@@ -1,0 +1,12 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "rewrites": [
+    { "source": "/robots.txt", "destination": "/api/index?__p=robots.txt" },
+    { "source": "/sitemap.xml", "destination": "/api/index?__p=sitemap.xml" },
+    { "source": "/st366-sitemap.xml", "destination": "/api/index?__p=st366-sitemap.xml" },
+    { "source": "/", "destination": "/api/index?__p=" },
+    { "source": "/:path((?!api/).*)", "destination": "/api/index?__p=:path" }
+  ],
+  "functions": { "api/index.js": { "maxDuration": 30 } }
+}

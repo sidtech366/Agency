@@ -1,0 +1,8 @@
+{
+  "name": "sidtech366-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SidTech 366 company website — data from Google Apps Script, rendered on Vercel",
+  "engines": { "node": ">=18" },
+  "scripts": { "dev": "node dev.js" }
+}
