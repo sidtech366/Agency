@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1430">
+<meta name="robots" content="noindex">
+<title>QR Attendance Scanner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--q1:#2563eb;--q2:#22d3ee}
+body.exam{--q1:#7c3aed;--q2:#f472b6}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#0b1430;color:#e2e8f0;font-family:Poppins,system-ui,sans-serif}
+body{background:radial-gradient(900px 500px at 0% 0%,color-mix(in srgb,var(--q1) 28%,transparent),transparent 60%),radial-gradient(700px 500px at 100% 100%,color-mix(in srgb,var(--q2) 20%,transparent),transparent 60%),linear-gradient(160deg,#0b1430,#111c3f 55%,#0b1430);background-attachment:fixed;padding:14px 14px calc(18px + env(safe-area-inset-bottom))}
+.wrap{max-width:1000px;margin:0 auto}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;margin-bottom:12px}
+.mode{display:flex;gap:12px;align-items:center}
+.cube{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font-size:26px;background:linear-gradient(135deg,var(--q1),var(--q2));box-shadow:0 12px 26px -8px var(--q1),inset 0 -5px 0 rgba(0,0,0,.18),inset 0 2px 0 rgba(255,255,255,.35);transform:rotateX(14deg) rotateY(-18deg);animation:fl 4s ease-in-out infinite}
+@keyframes fl{50%{transform:rotateX(4deg) rotateY(14deg) translateY(-3px)}}
+.mode small{font-size:10.5px;letter-spacing:.18em;color:var(--q2);font-weight:800}
+.mode h1{margin:0;font-size:19px;color:#fff;font-weight:800}
+.mode p{margin:0;font-size:12px;color:#cbd5e1}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);white-space:nowrap}
+.chip.clk{font-weight:800;color:#fff;background:linear-gradient(135deg,var(--q1),var(--q2));border:0}
+.grid{display:grid;grid-template-columns:minmax(260px,460px) 1fr;gap:16px;align-items:start}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.dev{position:relative;padding:10px;border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.16);box-shadow:20px 26px 46px -20px rgba(0,0,0,.65)}
+.cam{position:relative;aspect-ratio:1/1;border-radius:18px;overflow:hidden;background:#000}
+.cam video{width:100%;height:100%;object-fit:cover}
+.cor i{position:absolute;width:44px;height:44px;border:4px solid var(--q2);filter:drop-shadow(0 0 6px var(--q2))}
+.cor i:nth-child(1){top:12%;left:12%;border-right:0;border-bottom:0;border-radius:12px 0 0 0}.cor i:nth-child(2){top:12%;right:12%;border-left:0;border-bottom:0;border-radius:0 12px 0 0}
+.cor i:nth-child(3){bottom:12%;left:12%;border-right:0;border-top:0;border-radius:0 0 0 12px}.cor i:nth-child(4){bottom:12%;right:12%;border-left:0;border-top:0;border-radius:0 0 12px 0}
+.laser{position:absolute;left:14%;right:14%;top:14%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--q2),transparent);box-shadow:0 0 14px 2px var(--q2);animation:ls 2.2s ease-in-out infinite}
+@keyframes ls{50%{top:84%}}
+.hint{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:12.5px;color:#fff;text-shadow:0 1px 3px #000;padding:0 10px}
+.btns{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+button,.btn{font-family:inherit;border:0;border-radius:12px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--q1),var(--q2))}
+button.x{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18)}
+.side .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.tile{border-radius:16px;padding:12px 14px;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.12)}
+.tile b{display:block;font-size:24px;color:#fff}.tile b small{font-size:13px;color:#94a3b8}.tile span{font-size:12px;color:#cbd5e1}
+.t1{border-left:4px solid #22c55e}.t2{border-left:4px solid #f59e0b}.t3{border-left:4px solid var(--q2)}.t4{border-left:4px solid #a78bfa}
+.recent{margin-top:12px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:10px 12px}
+.recent h4{margin:0 0 6px;font-size:13px;color:#fff}
+.rr{display:grid;grid-template-columns:30px 1fr auto auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid rgba(255,255,255,.07)}
+.rr:first-of-type{border-top:0}.av{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--q1),var(--q2))}
+.rr b{font-size:13px;color:#fff;display:block}.rr small{font-size:11px;color:#94a3b8}.st{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:rgba(34,197,94,.18);color:#86efac}.st.late{background:rgba(245,158,11,.2);color:#fcd34d}
+.rr time{font-size:11.5px;color:#cbd5e1}
+.panel{max-width:380px;margin:12vh auto 0;padding:24px;border-radius:22px;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.16);text-align:center}
+.panel input{width:100%;margin:6px 0;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(2,6,23,.5);color:#fff;font-size:15px;font-family:inherit}
+.err{color:#fca5a5;font-size:13px;min-height:18px;margin-top:6px}
+.res{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.55);backdrop-filter:blur(3px)}
+.card{position:relative;overflow:hidden;background:#fff;color:#0f172a;border-radius:24px;padding:24px 26px 20px;min-width:280px;max-width:92vw;text-align:center;box-shadow:0 40px 80px -20px rgba(0,0,0,.5);animation:fp .55s cubic-bezier(.2,.9,.3,1.2);border-top:7px solid #10b981}
+.card.late{border-top-color:#f59e0b}.card.info{border-top-color:#3b82f6}.card.err{border-top-color:#ef4444}.card.exam{border-top-color:#8b5cf6}
+@keyframes fp{from{transform:rotateY(-80deg) scale(.7);opacity:0}to{transform:none;opacity:1}}
+.card .hd{font-weight:800;font-size:16px;margin-bottom:10px}
+.ph{width:100px;height:100px;margin:0 auto 10px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:linear-gradient(135deg,#2563eb,#22d3ee);color:#fff;font-size:40px;font-weight:800;box-shadow:0 0 0 5px #fff,0 0 0 8px #e0f2fe}
+.ph img{width:100%;height:100%;object-fit:cover}
+.nm{font-size:19px;font-weight:800}.mt{font-size:12.5px;color:#475569;font-weight:600;margin-top:2px}
+.ss{display:inline-block;margin-top:10px;font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:999px;background:#dcfce7;color:#166534}
+.ss.late{background:#fef3c7;color:#92400e}.ss.info{background:#dbeafe;color:#1e40af}
+.foot{text-align:center;font-size:10.5px;letter-spacing:.14em;opacity:.45;margin-top:16px;text-transform:uppercase}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap" id="root"></div>
+<div class="foot">SidTech India</div>
+<script>
+/* ============================================================
+   SidTech QR Attendance Scanner (alag page - yahan live camera chalta hai)
+   School app → Attendance → QR Scan → "Open QR Scanner" se khulta hai (school link + login saath aata hai).
+   Data seedha school ke server se (doPost: qrBoard / qrScan / login).
+   ============================================================ */
+var S = { app: '', tok: '', name: '', lat: null, lng: null, board: null, busy: false, last: '', lastAt: 0, stream: null, facing: 'environment', bd: null, wl: null };
+var $ = function (s) { return document.querySelector(s); };
+var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k) || ''; if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return ''; } }
+(function () {
+  var h = new URLSearchParams(location.hash.slice(1));
+  if (h.get('app')) { ls('sq_app', h.get('app')); ls('sq_tok', h.get('tok') || ''); ls('sq_name', h.get('n') || ''); history.replaceState(null, '', location.pathname); }
+  S.app = ls('sq_app'); S.tok = ls('sq_tok'); S.name = ls('sq_name');
+})();
+function api(action, data) {
+  return fetch(S.app, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action: action, token: S.tok }, data || {})) })
+    .then(function (r) { return r.json(); });
+}
+function speak(t) { try { if (!('speechSynthesis' in window)) return; var u = new SpeechSynthesisUtterance(t); u.lang = 'en-IN'; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {} }
+
+/* ---------- screens ---------- */
+function noApp() {
+  $('#root').innerHTML = '<div class="panel"><div style="font-size:46px">📷</div><h2>QR Attendance Scanner</h2><p style="color:#cbd5e1;font-size:14px">Open this scanner from your school app:<br><b>Attendance → QR Scan → Open QR Scanner</b></p></div>';
+}
+function loginBox(msg) {
+  stopCam();
+  $('#root').innerHTML = '<div class="panel"><div style="font-size:42px">🔐</div><h2 style="margin:6px 0">' + esc(S.name || 'School') + '</h2><p style="color:#cbd5e1;font-size:13px;margin:0 0 10px">Login to start the QR scanner</p>' +
+    '<input id="lm" inputmode="numeric" maxlength="10" placeholder="Mobile number"><input id="lp" type="password" placeholder="Password"><button style="width:100%;margin-top:8px" onclick="doLogin()">Login</button><div class="err" id="le">' + esc(msg || '') + '</div></div>';
+  $('#lp').onkeydown = function (e) { if (e.key === 'Enter') doLogin(); };
+}
+function doLogin() {
+  $('#le').textContent = 'Please wait…';
+  api('login', { mobile: $('#lm').value, password: $('#lp').value }).then(function (r) {
+    if (r.status !== 'success') { $('#le').textContent = r.message || 'Login failed'; return; }
+    S.tok = r.token; ls('sq_tok', S.tok); start();
+  }).catch(function () { $('#le').textContent = 'No internet / server not reachable'; });
+}
+function shell() {
+  $('#root').innerHTML = '<div class="top"><div class="mode"><div class="cube" id="cube">🏫</div><div><small id="mk">SCHOOL TIME</small><h1 id="mt">School Time QR Attendance</h1><p id="ms">' + esc(S.name) + '</p></div></div><div class="chips" id="chips"></div></div>' +
+    '<div class="grid"><div><div class="dev"><div class="cam"><video id="v" playsinline muted autoplay></video><div class="cor"><i></i><i></i><i></i><i></i></div><div class="laser"></div><div class="hint" id="hint">Starting camera…</div></div></div>' +
+    '<div class="btns"><button class="x" onclick="flip()">🔄 Switch camera</button><button class="x" onclick="logout()">⏻ Logout</button></div></div>' +
+    '<div class="side"><div class="tiles" id="tiles"></div><div class="recent"><h4>⚡ Latest scans</h4><div id="recent"><div style="color:#94a3b8;font-size:13px">Loading…</div></div></div></div></div>';
+}
+function logout() { ls('sq_tok', null); S.tok = ''; loginBox(); }
+
+/* ---------- board ---------- */
+function loadBoard() {
+  return api('qrBoard').then(function (r) {
+    if (r.status === 'expired') { loginBox('Your login has expired. Please login again.'); return false; }
+    if (r.status !== 'success') { var h = $('#hint'); if (h) h.textContent = r.message || 'Error'; return true; }
+    S.board = r.board; if (r.school) { S.name = r.school; ls('sq_name', S.name); } paint(); return true;
+  }).catch(function () { var h = $('#hint'); if (h) h.textContent = 'No internet / server not reachable'; return true; });
+}
+function paint() {
+  var b = S.board; if (!b || !$('#tiles')) return;
+  var ex = b.mode === 'exam'; document.body.classList.toggle('exam', ex);
+  $('#cube').textContent = ex ? '📝' : '🏫'; $('#mk').textContent = ex ? 'EXAM TIME' : 'SCHOOL TIME';
+  $('#mt').textContent = ex ? 'Exam Time QR Attendance' : 'School Time QR Attendance';
+  $('#ms').textContent = S.name + (ex ? ' • ' + b.exams.join(', ') : '');
+  $('#chips').innerHTML = (b.closed ? '<span class="chip">🏖️ ' + esc(b.closed) + '</span>' : '') + (b.stuArrival ? '<span class="chip">🎒 by <b>' + esc(b.stuArrival) + '</b> +' + (b.stuGrace || 0) + 'm</span>' : '') + '<span class="chip clk" id="clk"></span>';
+  var c = b.counts;
+  $('#tiles').innerHTML = '<div class="tile t1"><b>' + c.present + '<small>/' + b.students + '</small></b><span>🎒 Students in</span></div><div class="tile t2"><b>' + c.late + '</b><span>⏰ Late</span></div>' +
+    '<div class="tile t3"><b>' + c.qr + '</b><span>📷 QR scans today</span></div>' + (b.office ? '<div class="tile t4"><b>' + c.staff + '<small>/' + b.staffTotal + '</small></b><span>🧑‍🏫 Staff in</span></div>' : '');
+  $('#recent').innerHTML = b.recent.length ? b.recent.map(function (r) { return '<div class="rr"><span class="av">' + esc(String(r.name || '?').charAt(0)) + '</span><div><b>' + esc(r.name) + '</b><small>' + (r.type === 'Staff' ? 'Staff' : 'Student') + '</small></div><span class="st ' + (r.status === 'Late' ? 'late' : '') + '">' + esc(r.status) + '</span><time>' + esc(r.at) + '</time></div>'; }).join('') : '<div style="color:#94a3b8;font-size:13px">No QR scans yet today</div>';
+  tick();
+}
+function tick() { var k = $('#clk'); if (k) k.textContent = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }); }
+setInterval(tick, 20000);
+
+/* ---------- QR reader ---------- */
+var JSQR_URLS = ['https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js', 'https://unpkg.com/jsqr@1.4.0/dist/jsQR.js'];
+function loadJsQR(i) {
+  i = i || 0; if (window.jsQR || i >= JSQR_URLS.length) return;
+  var s = document.createElement('script'); s.src = JSQR_URLS[i]; s.onerror = function () { loadJsQR(i + 1); }; document.head.appendChild(s);
+}
+try { if ('BarcodeDetector' in window) S.bd = new BarcodeDetector({ formats: ['qr_code'] }); } catch (e) { S.bd = null; }
+if (!S.bd) loadJsQR();
+var CV = document.createElement('canvas');
+function decode(v) {
+  if (S.bd) return S.bd.detect(v).then(function (l) { return l && l[0] ? l[0].rawValue : ''; }).catch(function () { return ''; });
+  if (!window.jsQR) return Promise.resolve('');
+  var sc = Math.min(1, 800 / Math.max(v.videoWidth, v.videoHeight)), w = Math.round(v.videoWidth * sc), h = Math.round(v.videoHeight * sc);
+  CV.width = w; CV.height = h; var g = CV.getContext('2d', { willReadFrequently: true }); g.drawImage(v, 0, 0, w, h);
+  var d = g.getImageData(0, 0, w, h), c = jsQR(d.data, w, h, { inversionAttempts: 'attemptBoth' }); return Promise.resolve(c ? c.data : '');
+}
+/* ---------- camera ---------- */
+function stopCam() { if (S.stream) { S.stream.getTracks().forEach(function (t) { t.stop(); }); S.stream = null; } }
+function startCam() {
+  stopCam(); var hint = $('#hint');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { hint.textContent = 'This browser cannot open the camera. Use Chrome.'; return; }
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: S.facing }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false }).then(function (st) {
+    S.stream = st; var v = $('#v'); v.srcObject = st; var p = v.play(); if (p && p.catch) p.catch(function () {});
+    hint.textContent = 'Hold the ID card / admit card QR in front of the camera';
+    try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { S.wl = w; }).catch(function () {}); } catch (e) {}
+    loop();
+  }).catch(function (e) {
+    hint.textContent = (e && e.name === 'NotAllowedError') ? 'Camera blocked. Tap 🔒 in the address bar → Camera → Allow, then reload.' : 'Camera could not start (' + (e && e.name || e) + ')';
+  });
+}
+function flip() { S.facing = S.facing === 'environment' ? 'user' : 'environment'; startCam(); }
+function loop() {
+  var v = $('#v'); if (!v || !S.stream) return;
+  if (v.readyState >= 2 && v.videoWidth && !S.busy) {
+    S.busy = true;
+    decode(v).then(function (t) {
+      var now = Date.now();
+      if (t && !(t === S.last && now - S.lastAt < 5000)) { S.last = t; S.lastAt = now; scan(t); } else S.busy = false;
+    }, function () { S.busy = false; });
+  }
+  setTimeout(loop, 180);
+}
+function scan(code) {
+  $('#hint').textContent = '⏳ Marking…';
+  api('qrScan', { code: code, lat: S.lat, lng: S.lng, src: 'camera' }).then(function (r) {
+    if (r.status === 'expired') { S.busy = false; loginBox('Your login has expired. Please login again.'); return; }
+    show(r.status === 'success' ? r.result : { err: r.message || 'Error' });
+    loadBoard();
+  }).catch(function () { show({ err: 'No internet / server not reachable' }); });
+}
+function show(r) {
+  var old = $('.res'); if (old) old.remove();
+  var box = document.createElement('div'); box.className = 'res';
+  if (r.err) { box.innerHTML = '<div class="card err"><div style="font-size:48px">❌</div><div class="nm" style="font-size:16px">' + esc(r.err) + '</div></div>'; speak('Not valid, please try again'); }
+  else {
+    var late = r.status === 'Late', exam = !!r.exam, k = r.already ? 'info' : late ? 'late' : 'ok';
+    var meta = []; if (r['class']) meta.push(r['class'] + (r.section ? ' - ' + r.section : '')); if (r.roll) meta.push('Roll ' + r.roll);
+    box.innerHTML = '<div class="card ' + k + (exam ? ' exam' : '') + '"><div class="hd">' + (r.already ? '🔁 Already marked' : exam ? '📝 Best of luck!' : late ? '⏰ Marked Late' : '🎉 Congratulations!') + '</div>' +
+      '<div class="ph">' + (r.photo ? '<img src="' + esc(r.photo) + '">' : esc(String(r.name || '?').charAt(0))) + '</div><div class="nm">' + esc(r.name) + '</div>' +
+      (meta.length ? '<div class="mt">' + esc(meta.join(' · ')) + '</div>' : '') + (exam ? '<div class="mt">📝 ' + esc(r.exam) + '</div>' : '') +
+      '<div class="ss ' + k + '">' + (r.already ? 'Already marked' : 'Attendance marked') + ' • ' + esc(r.status) + (r.time ? ' • ' + esc(r.time) : '') + '</div></div>';
+    var nm = r.name || '';
+    speak(r.already ? nm + ', your attendance is already marked' : exam ? 'Welcome ' + nm + '. Best of luck for your exam' : late ? nm + ', you are late today. Attendance marked' : 'Congratulations ' + nm + '. Attendance marked. Have a great day');
+  }
+  document.body.appendChild(box);
+  setTimeout(function () { box.remove(); S.busy = false; var h = $('#hint'); if (h) h.textContent = 'Hold the ID card / admit card QR in front of the camera'; }, 2300);
+}
+/* ---------- start ---------- */
+if (navigator.geolocation) navigator.geolocation.watchPosition(function (p) { S.lat = p.coords.latitude; S.lng = p.coords.longitude; }, function () {}, { enableHighAccuracy: true, maximumAge: 60000 });
+function start() {
+  if (!S.app) return noApp();
+  if (!S.tok) return loginBox();
+  shell(); loadBoard().then(function (ok) { if (ok !== false) startCam(); });
+  clearInterval(S.bt); S.bt = setInterval(function () { if (S.stream) loadBoard(); }, 30000);
+}
+document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && S.tok && S.app && !S.stream && $('#v')) startCam(); });
+start();
+</script>
+</body>
+</html>
