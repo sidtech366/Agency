@@ -2,6 +2,7 @@
 
 Data aur admin panel Google Apps Script me hain. Ye repo sirf website dikhata hai (har page ka asli HTML, Google SEO ke saath).
 
+
 ## Files
 | File | Kaam |
 |---|---|
