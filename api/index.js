@@ -34,6 +34,9 @@ module.exports = async (req, res) => {
   if (out.location) res.setHeader('Location', out.location);
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');                                   // dusri site hamare pages ko frame karke dhokha na de
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Permissions-Policy', 'geolocation=(), payment=(self "https://checkout.razorpay.com" "https://api.razorpay.com")');
   // CDN cache: 10 min fresh, phir background me naya (stale-while-revalidate). ?refresh=1 = turant naya.
   res.setHeader('Cache-Control', fresh || !ok ? 'no-store' : (out.status === 200 ? 'public, s-maxage=600, stale-while-revalidate=86400' : 'public, s-maxage=60'));
   res.end(out.body);
