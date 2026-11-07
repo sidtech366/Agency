@@ -31,6 +31,7 @@ module.exports = async (req, res) => {
   const out = route(data, origin, path, query);
   res.statusCode = out.status;
   res.setHeader('Content-Type', out.type);
+  if (out.location) res.setHeader('Location', out.location);
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   // CDN cache: 10 min fresh, phir background me naya (stale-while-revalidate). ?refresh=1 = turant naya.
