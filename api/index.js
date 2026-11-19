@@ -36,7 +36,9 @@ module.exports = async (req, res) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');                                   // dusri site hamare pages ko frame karke dhokha na de
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  res.setHeader('Permissions-Policy', 'geolocation=(), payment=(self "https://checkout.razorpay.com" "https://api.razorpay.com")');
+  // GPS सिर्फ़ अपनी साइट + अपने टूल्स (GitHub jyotishi, Apps Script) के लिए; कंपास सेंसर भी इन्हीं को
+  const OWN = '"https://sidtech366.github.io" "https://script.google.com" "https://*.googleusercontent.com"';
+  res.setHeader('Permissions-Policy', 'geolocation=(self ' + OWN + '), accelerometer=(self ' + OWN + '), gyroscope=(self ' + OWN + '), magnetometer=(self ' + OWN + '), payment=(self "https://checkout.razorpay.com" "https://api.razorpay.com")');
   // CDN cache: 10 min fresh, phir background me naya (stale-while-revalidate). ?refresh=1 = turant naya.
   res.setHeader('Cache-Control', fresh || !ok ? 'no-store' : (out.status === 200 ? 'public, s-maxage=600, stale-while-revalidate=86400' : 'public, s-maxage=60'));
   res.end(out.body);
